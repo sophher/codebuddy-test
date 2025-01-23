@@ -3,16 +3,27 @@
 
 # Configuration
 $sourceUrl = "https://ash-speed.hetzner.com/100MB.bin"
+$resourceGroupName = "agilox-jira-backup"
 $storageAccountName = "agiloxjirabackupstorage"
 $containerName = "agiloxjirabackupstorage"
-$blobName = "speedtest-$(Get-Date -Format 'yyyyMMdd-HHmmss').bin"
+$blobName = "speedtest.bin"
 
 try {
     # Connect to Azure using managed identity
+    Write-Output "Connecting to Azure using managed identity..."
     Connect-AzAccount -Identity
 
     # Get storage account context
-    $storageAccount = Get-AzStorageAccount -ResourceGroupName (Get-AzContext).Subscription.Id -Name $storageAccountName
+    Write-Output "Getting storage account context..."
+    $storageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName
+    if (-not $storageAccount) {
+        throw "Could not find storage account '$storageAccountName' in resource group '$resourceGroupName'"
+    }
+
+    # Verify we have a valid context
+    if (-not $storageAccount.Context) {
+        throw "Failed to get valid storage context. Please verify managed identity permissions."
+    }
 
     # Start the copy operation
     Start-AzStorageBlobCopy -AbsoluteUri $sourceUrl -DestContainer $containerName -DestBlob $blobName -Context $storageAccount.Context
@@ -30,7 +41,7 @@ try {
         Write-Output "File successfully copied to Azure Blob Storage"
     }
     else {
-        throw "Copy operation failed with status: $($copyStatus.Status)"
+        throw "Copy operation failed with status: $($copyStatus.Status). Please check storage account permissions."
     }
 }
 catch {
