@@ -2,6 +2,7 @@
 # Requires Az.Storage module
 
 # Configuration
+$subscriptionId = "e4ca3d2d-0a67-424e-b08f-78b4c49a49f5"
 $sourceUrl = "https://ash-speed.hetzner.com/100MB.bin"
 $resourceGroupName = "agilox-jira-backup"
 $storageAccountName = "agiloxjirabackupstorage"
@@ -12,6 +13,13 @@ try {
     # Connect to Azure using managed identity
     Write-Output "Connecting to Azure using managed identity..."
     Connect-AzAccount -Identity
+
+    # Set subscription context
+    Write-Output "Setting subscription context..."
+    Set-AzContext -SubscriptionId $subscriptionId
+    $currentContext = Get-AzContext
+    Write-Output "Current subscription: $($currentContext.Subscription.Name)"
+    Write-Output "Current tenant: $($currentContext.Tenant.Id)"
 
     # Get storage account context
     Write-Output "Getting storage account context..."
@@ -45,6 +53,6 @@ try {
     }
 }
 catch {
-    Write-Error "An error occurred: $_"
+    Write-Error "An error occurred: $($_.Exception.Message)`nStack trace: $($_.ScriptStackTrace)"
     throw
 }
