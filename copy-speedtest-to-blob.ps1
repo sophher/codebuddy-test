@@ -63,7 +63,7 @@ try {
     Write-Output "Starting copy operation..."
     
     # Start the actual copy operation
-    $blob = Start-AzStorageBlobCopy -AbsoluteUri $sourceUrl -DestContainer $containerName -DestBlob $blobName -Context $storageAccountContext -Force
+    $blob = Start-AzStorageBlobCopy -AbsoluteUri $sourceUrl -DestContainer $containerName -DestBlob $blobName -DestContext $storageAccountContext -Force
     if (-not $blob) {
         throw "Failed to initiate copy operation."
     }
